@@ -1,0 +1,35 @@
+requests == 2.32.3
+openai == 1.35.14
+
+nest_asyncio == 1.6.0
+aiogram == 3.10.0
+telethon == 1.36.0
+
+python-decouple == 3.4
+setuptools == 70.3.0
+datetime == 4.9
+typing == 3.6.6
+
+psycopg2-binary==2.9.9
+sqlalchemy == 2.0.25
+pika == 1.3.2
+sqlmodel==0.0.16
+
+pandas == 2.2.2
+numpy == 1.26.1
+matplotlib == 3.9.1
+seaborn == 0.13.2
+scikit-learn == 1.5.1
+nltk == 3.8.1
+spacy == 3.7.5
+scipy == 1.14.0
+xgboost == 2.1.0
+thinc==8.2.5
+
+emoji == 2.12.1
+vaderSentiment == 3.3.2
+num2words == 0.5.13
+pymorphy2 == 0.9.1
+#bertopic == 0.16.2
+transformers == 4.42.4
+accelerate == 0.32.1
