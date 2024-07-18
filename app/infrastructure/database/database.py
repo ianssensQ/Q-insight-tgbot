@@ -5,7 +5,9 @@ from decouple import config
 from contextlib import contextmanager
 
 SQL_CONNECTION = config("DATABASE_URL")
-engine = create_engine(SQL_CONNECTION)
+SELECTL_DB = config("SELECTL_DB")
+
+engine = create_engine(SELECTL_DB)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
