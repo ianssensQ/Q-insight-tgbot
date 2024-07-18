@@ -1,24 +1,5 @@
 version: '3'
 services:
-  database:
-    image: postgres:14.3-alpine
-    container_name: database
-    ports:
-      - 5432:5432
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    restart: always
-    ports:
-      - 5050:5050
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-
   rabbitmq:
     image: rabbitmq:3.10.7-management
     hostname: rabbitmq

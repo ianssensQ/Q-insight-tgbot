@@ -1,10 +1,8 @@
 from app.infrastructure.database.database import Base, engine
 from app.infrastructure.models_tables.usertable import UserTable
-
-
-# from app.infrastructure.models_tables.balance import BalanceTable
-# from app.infrastructure.models_tables.transactions import TransactionHistory
-# from app.infrastructure.models_tables.data import RequestTable
+from app.infrastructure.models_tables.taskstable import TaskTable
+from app.infrastructure.models_tables.channelstable import ChannelTable
+from app.infrastructure.models_tables.poststable import PostTable
 
 
 def init_db():

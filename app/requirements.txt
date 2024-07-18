@@ -5,6 +5,7 @@ nest_asyncio == 1.6.0
 aiogram == 3.10.0
 telethon == 1.36.0
 
+loguru == 0.7.2
 python-decouple == 3.4
 setuptools == 70.3.0
 datetime == 4.9

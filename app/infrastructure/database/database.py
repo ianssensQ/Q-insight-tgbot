@@ -27,7 +27,6 @@ if __name__ == "__main__":
 
     Session = sessionmaker(bind=engine)
     session = Session()
-    print('0000')
     try:
         # Попробуйте подключиться к базе данных
         connection = engine.connect()
