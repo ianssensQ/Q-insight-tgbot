@@ -78,4 +78,12 @@ class Post:
 
 if __name__ == "__main__":
     pass
-    # pd.to_sql
+    post = Post()
+
+    if not post.get_ids(1, 2):
+        print('waiting')
+    """
+    while State == 'waiting for data':
+        if post.get_ids(1, 2):    
+            state = 'ready'
+    """

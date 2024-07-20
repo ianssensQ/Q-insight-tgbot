@@ -1,7 +1,8 @@
 from app.infrastructure.database.database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from app.infrastructure.models_tables.taskstable import TaskTable
 from app.infrastructure.models_tables.channelstable import ChannelTable
+import datetime
 
 
 class PostTable(Base):
@@ -12,7 +13,7 @@ class PostTable(Base):
 
     post_text = Column(String)
     post_url = Column(String)
-    post_date = Column(String)
+    post_date = Column(DateTime)
 
     class_ = Column(Integer)
 

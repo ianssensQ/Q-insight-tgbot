@@ -14,5 +14,18 @@ services:
       - 15672:15672
       - 5672:5672
 
-
+  parser_worker:
+    build: ./app/
+    env_file:
+      - app/.env
+    volumes:
+      - ./app:/app
+    command: python services/rabbit/parser_worker/parser.py
+    depends_on:
+      rabbitmq:
+        condition: service_started
+    restart: on-failure
+    deploy:
+      mode: replicated
+      replicas: 2
 
