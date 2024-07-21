@@ -83,7 +83,7 @@ if __name__ == "__main__":
     if not post.get_ids(1, 2):
         print('waiting')
     """
-    while State == 'waiting for data':
+    while states == 'waiting for data':
         if post.get_ids(1, 2):    
             state = 'ready'
     """

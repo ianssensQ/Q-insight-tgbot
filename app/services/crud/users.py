@@ -26,6 +26,14 @@ class User:
 
             logger.info(f"User saved: {user}")
 
+    def check_user(self):
+        with SessionLocal() as db:
+            user = db.query(UserTable).filter(UserTable.tg_id == self.tg_id).first()
+            if user:
+                return True
+            else:
+                return False
+
     def add_channels(self, new_tg_trackable_channels):
         with SessionLocal() as db:
             user = db.query(UserTable).filter(UserTable.tg_id == self.tg_id).first()
@@ -34,11 +42,14 @@ class User:
                 if channel not in updated_channels:
                     updated_channels.append(channel)
 
-            user.tg_trackable_channels = updated_channels
-            db.commit()
-            db.refresh(user)
-
-            logger.info(f"Channels added: {user}")
+            if updated_channels == user.tg_trackable_channels:
+                return True
+            else:
+                user.tg_trackable_channels = updated_channels
+                db.commit()
+                db.refresh(user)
+                logger.info(f"Channels added: {user}")
+                return False
 
     def remove_channels(self, new_tg_trackable_channels):
         with SessionLocal() as db:
@@ -71,11 +82,15 @@ class User:
 
 
 if __name__ == "__main__":
-    user = User(1, 1221, ["Ivanov", "alexey@ya.ru", "12345"])
-    user.create_user()
+    user_me = User(tg_id=303492357)
+    print(user_me.get_tg_trackable_channels())
+
+    # print(user_me.add_channels(['http://t.me/econs']))
+    # user = User(1, 1221, ["Ivanov", "alexey@ya.ru", "12345"])
+    # user.create_user()
     # user.add_channels(["444"])
     # user.remove_channels(["Ivanov"])
-    user.get_tg_trackable_channels()
+    # user.get_tg_trackable_channels()
     # user.delete_channels()
 
 

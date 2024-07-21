@@ -20,7 +20,7 @@ services:
       - app/.env
     volumes:
       - ./app:/app
-    command: python services/rabbit/parser_worker/parser.py
+    command: python services/rabbit/workers/parser.py
     depends_on:
       rabbitmq:
         condition: service_started
