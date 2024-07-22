@@ -82,6 +82,11 @@ def channel_list_view(channels_):
 
 
 def date_keyboard():
+    """
+    Создает клавиатуру с кнопками "1 день", "3 дня", "7 дней".
+
+    :return: InlineKeyboardMarkup
+    """
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="▪️1 день", callback_data='1'),

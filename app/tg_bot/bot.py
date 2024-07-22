@@ -3,7 +3,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
-from handlers import common, summarize, base_channels
+from handlers import common, summarize, base_channels, ml_logic
 from decouple import config
 
 
@@ -31,7 +31,8 @@ async def main(bot):
 
     dp.include_routers(common.router,
                        summarize.router,
-                       base_channels.router)
+                       base_channels.router,
+                       ml_logic.router)
 
     await set_commands(bot)
     await dp.start_polling(bot)

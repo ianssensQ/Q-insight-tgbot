@@ -9,8 +9,10 @@ from app.tg_bot.keyboards.inline import (channel_list_urls, add_buttons_to_keybo
 from app.tg_bot.states.summ import Summ
 from app.services.crud.users import User
 from app.services.crud.tasks import Task
+from app.services.crud.channels import Channel
 from app.services.rabbit.utils.parser_init import client
 from app.tg_bot.bot import bot
+from app.tg_bot.handlers.ml_logic import predict_redirect
 
 router = Router()
 
@@ -18,7 +20,7 @@ router = Router()
 async def del_mess(callback: CallbackQuery):
     try:
         await callback.message.delete()
-    except:
+    except Exception as e:
         pass
 
 
@@ -62,7 +64,7 @@ async def summ_base(callback: CallbackQuery, state: FSMContext):
 async def summ_base_func(message: Message, state: FSMContext):
     try:
         await message.delete()
-    except:
+    except Exception as e:
         pass
     await message.answer(
         text="📕📕📕📕📕",
@@ -192,13 +194,28 @@ async def choose_date(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(StateFilter(Summ.generate_task))
 async def generate_task(callback: CallbackQuery, state: FSMContext):
+    await del_mess(callback)
     interval = int(callback.data)
     user_data = await state.get_data()
     task_list = user_data['task_list']
     user_tg_id = user_data['tg_id']
     task = Task(user_tg_id=user_tg_id, tg_tasked_channels=task_list, interval=interval)
     task.create_task()
+    await state.update_data(task_id=task.id)
+    await state.update_data(interval=interval)
+    channel_info = []
+    for channel_url in task_list:
+        channel = Channel(task_id=task.id, tg_channel_name=channel_url, interval=interval)
+        channel.create_channel()
+        channel_info.append(channel.id)
+        await state.update_data(channel_info=channel_info)
 
+    await callback.message.answer(
+        text="✅ Суммаризация запущена!",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    await state.set_state(Summ.Redirect)
+    await predict_redirect(callback, state)
 
 # -----------------------------
 
@@ -268,7 +285,7 @@ async def catch_private_channels(message: Message, state: FSMContext):
     try:
         await message.delete()
         await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id-1)
-    except:
+    except Exception as e:
         pass
     await message.answer(
         text="🟥 Канал приватный 🔚",
@@ -288,7 +305,7 @@ async def catch_channels(message: Message, state: FSMContext):
         await message.delete()
         await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
         await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 2)
-    except:
+    except Exception as e:
         pass
 
     if url in task_list:

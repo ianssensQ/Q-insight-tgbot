@@ -55,9 +55,10 @@ class Task:
 
 
 if __name__ == "__main__":
-    task = Task(1, 1, ["Ivanov", "alexey@ya.ru", "12345"], 1)
+    task = Task(user_tg_id=303492357, tg_tasked_channels=["Ivanov", "alexey@ya.ru", "12345"], interval=1)
     task.create_task()
+    print(task.id)
     # print(task.check_res())
     # print(task.load_task_result())
-    task.save_task_result("test")
+    #task.save_task_result("test")
     # print(task.check_res())

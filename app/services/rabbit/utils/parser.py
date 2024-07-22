@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import pytz
 
 
-async def fetch_messages(channel_username, limit=100, days=1):
+async def fetch_messages(channel_username, limit=150, days=1):
     async with client:
         channel = await client.get_entity(channel_username)
         messages = []

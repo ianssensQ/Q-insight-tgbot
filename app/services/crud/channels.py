@@ -30,6 +30,12 @@ class Channel:
 
             logger.info(f"Channel saved: {channel}")
 
+    def find_channel(self):
+        with SessionLocal() as db:
+            channel = db.query(ChannelTable).filter(ChannelTable.id == self.id).first()
+            logger.info(f"Channel found: {channel}")
+            return channel
+
     def save_channel_result(self, summ_result):
         with SessionLocal() as db:
             channel = db.query(ChannelTable).filter(ChannelTable.id == self.id).first()

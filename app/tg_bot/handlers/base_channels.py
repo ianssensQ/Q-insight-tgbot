@@ -17,7 +17,7 @@ bot = Bot(token=config('BOT_TOKEN'))
 async def del_mess(callback: CallbackQuery):
     try:
         await callback.message.delete()
-    except:
+    except Exception as e:
         pass
 
 @router.callback_query(StateFilter(Summ.no_base), F.data == "no_base")
@@ -88,7 +88,7 @@ async def catch_privat_channels(message: Message, state: FSMContext):
         await message.delete()
         await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id-1)
         # await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id-2)
-    except:
+    except Exception as e:
         pass
     await message.answer(
         text="🟥 Канал приватный 🔚",
@@ -112,7 +112,7 @@ async def catch_channels(message: Message, state: FSMContext):
         await message.delete()
         await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id-1)
         # await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id-2)
-    except:
+    except Exception as e:
         pass
 
     if user.add_channels([message.text]):

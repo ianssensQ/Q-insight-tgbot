@@ -10,3 +10,4 @@ class Summ(StatesGroup):
     generate_task = State()
     catch_channel = State()
     choosing_custom = State()
+    Redirect = State()
