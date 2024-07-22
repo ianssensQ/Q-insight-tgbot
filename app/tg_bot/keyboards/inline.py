@@ -1,21 +1,15 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
-def channel_list_view(channels_urls):
+def make_inline_keyboard(buttons):
     """
-    Выводит список каналов в виде клавиатуры
-    и названия каналов передаются в виде callback_data
+    Создает клавиатуру с произвольным количеством кнопок.
 
-    :param channels_urls: Список URL TG каналов, имена которых нужно вывести
-    :return: InlineKeyboardMarkup
+    :param buttons: Список пар (текст кнопки, callback_data), которые нужно добавить
+    :return: Обновленная клавиатура
     """
-    keyboard = []
-    channel_names = []
-    for channel in channels_urls:
-        name = channel.title
-        keyboard.append([InlineKeyboardButton(text=name, callback_data=name)])
-        channel_names.append(name)
-    return InlineKeyboardMarkup(inline_keyboard=keyboard), channel_names
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[])
+    return add_buttons_to_keyboard(keyboard, buttons)
 
 
 def add_buttons_to_keyboard(keyboard, buttons):
@@ -65,6 +59,24 @@ def channel_list_urls(channels_):
         name = channel[0].title
         url = channel[1]
         keyboard.append([InlineKeyboardButton(text=name, callback_data=url)])
+        channel_names.append(name)
+    return InlineKeyboardMarkup(inline_keyboard=keyboard), channel_names
+
+
+def channel_list_view(channels_):
+    """
+    Выводит список каналов в виде клавиатуры
+    и ссылки каналов передаются в виде url
+
+    :param channels_:(channels_entities, channels_urls) Список URL TG каналов, имена которых можно удалить
+    :return: InlineKeyboardMarkup
+    """
+    keyboard = []
+    channel_names = []
+    for channel in channels_:
+        name = channel[0].title
+        url = channel[1]
+        keyboard.append([InlineKeyboardButton(text=name, url=url)])
         channel_names.append(name)
     return InlineKeyboardMarkup(inline_keyboard=keyboard), channel_names
 

@@ -8,3 +8,5 @@ class Summ(StatesGroup):
     no_base = State()
     choosing = State()
     generate_task = State()
+    catch_channel = State()
+    choosing_custom = State()

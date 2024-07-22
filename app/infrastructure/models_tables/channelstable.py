@@ -10,5 +10,4 @@ class ChannelTable(Base):
     tg_channel_name = Column(String)
     interval = Column(Integer)  # in days
 
-    posts_count = Column(Integer)
     summ_channel_result = Column(String)

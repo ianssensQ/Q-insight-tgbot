@@ -30,10 +30,9 @@ class Channel:
 
             logger.info(f"Channel saved: {channel}")
 
-    def save_channel_result(self, posts_count, summ_result):
+    def save_channel_result(self, summ_result):
         with SessionLocal() as db:
             channel = db.query(ChannelTable).filter(ChannelTable.id == self.id).first()
-            channel.posts_count = posts_count
             channel.summ_channel_result = summ_result
             db.commit()
             db.refresh(channel)
@@ -57,5 +56,4 @@ class Channel:
 if __name__ == "__main__":
     channel = Channel(1, 1, "Ivanov", 1)
     channel.create_channel()
-    channel.save_channel_result(1, "test")
-
+    channel.save_channel_result("test")

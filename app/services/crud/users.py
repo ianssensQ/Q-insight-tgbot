@@ -5,16 +5,14 @@ from loguru import logger
 
 
 class User:
-    def __init__(self, user_id="", tg_id="", tg_trackable_channels=None):
+    def __init__(self, tg_id="", tg_trackable_channels=None):
         if tg_trackable_channels is None:
             tg_trackable_channels = []
-        self.id = user_id
         self.tg_id = tg_id
         self.tg_trackable_channels = tg_trackable_channels
 
     def __repr__(self):
-        return (f"User(id={self.id},"
-                f" tg_id={self.tg_id},"
+        return (f" tg_id={self.tg_id},"
                 f"tg_channels={self.tg_trackable_channels})")
 
     def create_user(self):
@@ -22,7 +20,6 @@ class User:
             user = UserTable(tg_id=self.tg_id, tg_trackable_channels=self.tg_trackable_channels)
             db.add(user)
             db.commit()
-            self.id = user.id
 
             logger.info(f"User saved: {user}")
 
@@ -92,5 +89,3 @@ if __name__ == "__main__":
     # user.remove_channels(["Ivanov"])
     # user.get_tg_trackable_channels()
     # user.delete_channels()
-
-

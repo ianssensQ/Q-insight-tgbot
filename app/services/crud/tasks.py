@@ -5,24 +5,24 @@ from loguru import logger
 
 
 class Task:
-    def __init__(self, task_id="", user_id="",
+    def __init__(self, task_id="", user_tg_id="",
                  tg_tasked_channels=None, interval=""):
         if tg_tasked_channels is None:
             tg_tasked_channels = []
         self.id = task_id
-        self.user_id = user_id
+        self.user_tg_id = user_tg_id
         self.tg_tasked_channels = tg_tasked_channels
         self.interval = interval
 
     def __repr__(self):
         return (f"Task <(id={self.id},"
-                f" user_id={self.user_id},"
+                f" user_id={self.user_tg_id},"
                 f"tg_channels={self.tg_tasked_channels},"
                 f"interval={self.interval})>")
 
     def create_task(self):
         with SessionLocal() as db:
-            task = TaskTable(user_id=self.user_id,
+            task = TaskTable(user_tg_id=self.user_tg_id,
                              tg_tasked_channels=self.tg_tasked_channels,
                              interval=self.interval)
             db.add(task)
@@ -31,10 +31,9 @@ class Task:
 
             logger.info(f"Task saved: {task}")
 
-    def save_task_result(self, posts_count, summ_result):
+    def save_task_result(self, summ_result):
         with SessionLocal() as db:
             task = db.query(TaskTable).filter(TaskTable.id == self.id).first()
-            task.posts_count = posts_count
             task.summ_result = summ_result
             db.commit()
             db.refresh(task)
@@ -60,5 +59,5 @@ if __name__ == "__main__":
     task.create_task()
     # print(task.check_res())
     # print(task.load_task_result())
-    task.save_task_result(1, "test")
+    task.save_task_result("test")
     # print(task.check_res())

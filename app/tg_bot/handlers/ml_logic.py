@@ -1,0 +1,1 @@
+from app.services.rabbit.utils.open_summ_queue import open_queue

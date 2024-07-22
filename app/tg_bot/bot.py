@@ -2,7 +2,6 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.fsm.strategy import FSMStrategy
 from aiogram.types import BotCommand
 from handlers import common, summarize, base_channels
 from decouple import config
