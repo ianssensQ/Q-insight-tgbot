@@ -1,14 +1,14 @@
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
-
+from aiogram.types import Message, CallbackQuery
+from aiogram.enums import ParseMode
 from app.services.rabbit.utils.parametrs import connection_params
 from app.tg_bot.states.summ import Summ
+from app.services.crud.channels import Channel
 
-import joblib
+
 import pickle
-import datetime
 import uuid
 import pika
 import asyncio
@@ -18,6 +18,12 @@ router = Router()
 
 @router.callback_query(StateFilter(Summ.Redirect))
 async def predict_redirect(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer(
+        text=" Перехватил задачу ✔️ \n"
+             "Суммирую 🤖 \n"
+             "Это может занять несколько минут ⏳ ",
+    )
+
     user_data = await state.get_data()
     task_list = user_data['task_list']
     task_id = user_data['task_id']
@@ -71,11 +77,56 @@ async def predict_redirect(callback: CallbackQuery, state: FSMContext):
         auto_ack=False,
     )
     channel.start_consuming()
+    await state.set_state(Summ.Predict)
+    await callback.message.answer('Просуммировал 👀😤')
+    await predict_return(callback.message, state)
 
-    await callback.message.answer(
-        text="Перехватил ✔️"
-        "Суммируем 🤖 ",
+
+@router.message(StateFilter(Summ.Predict))
+async def predict_return(message: Message, state: FSMContext):
+    await message.answer(
+        text="Перехватил \n",
     )
+    user_data = await state.get_data()
+    task_id = user_data['task_id']
+    channel_ids = user_data['channel_info']
+
+    for channel_id in channel_ids:
+        channel = Channel(channel_id=channel_id)
+        result = channel.load_channel_result()[0]
+        result = await escape_markdown_v1(result)
+        result = await split_text(result, 4090)
+        if result == 'No data':
+            await message.answer(
+                text=f'Нет данных по данному каналу {channel_id} за этот промежуток времени. \n',
+            )
+        else:
+            await message.answer(
+                text=f'**Результаты суммирования по каналу {channel_id}**:\n',
+                parse_mode=ParseMode.MARKDOWN_V2
+            )
+            await message.answer(
+                text=result,
+                parse_mode=ParseMode.MARKDOWN_V2
+            )
+
+
+async def escape_markdown_v1(text):
+    """
+    Функция для экранирования специальных символов в тексте для Markdown v2 в Telegram.
+    """
+    text = text.replace('#', '')
+    special_chars = ['\\', '=', '`', '_', '{', '}', '[', ']', '(', ')', '>', '#', '+', '-', '.', '!', '|']
+    for char in special_chars:
+        text = text.replace(char, f'\\{char}')
+    return text
+
+
+async def split_text(text: str, length: int) -> list:
+    """
+    Функция для разбития текста на части, не превышающие заданную длину телеграма
+    """
+    return [text[i:i + length] for i in range(0, len(text), length)]
 
 
 async def send_channel_to_queue(channel,

@@ -11,3 +11,4 @@ class Summ(StatesGroup):
     catch_channel = State()
     choosing_custom = State()
     Redirect = State()
+    Predict = State()

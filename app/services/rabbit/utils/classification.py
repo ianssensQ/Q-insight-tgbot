@@ -3,19 +3,26 @@ import re
 import spacy
 import pymorphy2
 import emoji
+import torch
+import joblib
+import os
+import warnings
+
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from num2words import num2words
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 from transformers import AutoModel, AutoTokenizer
-import pandas as pd
-import torch
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
-from torch.utils.data import DataLoader, TensorDataset
+from decouple import config
 
-nltk.download('punkt')
-nltk.download('stopwords')
+warnings.filterwarnings("ignore")
+
+
+model_path = config('CLASSIFICATION_MODEL')
+classifier = joblib.load(model_path)
+
+"""nltk.download('punkt')
+nltk.download('stopwords')"""
 
 
 class Cleaner:
@@ -59,13 +66,38 @@ class Cleaner:
 
 
 cleaner = Cleaner()
-
-
-def classify_text(text):
-    data = cleaner.clean_text(text)
-
-
 m = 'cointegrated/rubert-tiny'
 tokenizer = AutoTokenizer.from_pretrained(m)
 model = AutoModel.from_pretrained(m)
 
+
+def get_embeddings(texts):
+    tokens = tokenizer(texts, padding=True, truncation=True, return_tensors='pt', max_length=256)
+    input_ids = tokens['input_ids']
+    attention_mask = tokens['attention_mask']
+
+    with torch.no_grad():
+        outputs = model(input_ids, attention_mask=attention_mask)
+        embeddings = outputs.last_hidden_state[:, 0, :].cpu().numpy()
+
+    return embeddings
+
+
+def classify_text(text):
+    data = cleaner.clean_text(text)
+    new_embeddings = get_embeddings(data)
+    prediction = classifier.predict(new_embeddings)
+
+    return prediction
+
+
+if __name__ == '__main__':
+    print(classify_text('Реклама, советую плотно прочитать!'))
+    print(classify_text('Какие крутые новости'))
+    print(classify_text('Екатерина Мизулина осудила Асхаба Тамаева! '
+              'На этот раз в руки главы «Лиги Безопасного Интернета» попала история о том,'
+              'как Тамаев слил в сеть личные данные своего разоблачителя и в итоге заставил '
+              'того извиняться. Екатерина выпустила большую серию постов в своем тг-канале, '
+              'она заявила, что Асхаб не уважает ислам, а также несколько раз назвала блогера '
+              '«скамером». Разборки дошли до того, что Мизулиной стали присылать угрозы в личные '
+              'сообщения…'))

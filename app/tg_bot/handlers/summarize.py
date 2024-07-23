@@ -116,7 +116,7 @@ async def choose_channels(callback: CallbackQuery, state: FSMContext):
         formatted_string = '🔘' + formatted_string
         await bot.send_message(
             chat_id=chat_id,
-            text=f"Добавленны все каналы для суммаризации:\n {formatted_string}",
+            text=f"Добавлены все каналы для суммаризации:\n {formatted_string}",
             reply_markup=ReplyKeyboardRemove(),
             disable_web_page_preview=True
         )
@@ -162,7 +162,7 @@ async def choose_all_channels(callback: CallbackQuery, state: FSMContext):
     formatted_string = '🔘' + formatted_string
     await bot.send_message(
         chat_id=chat_id,
-        text=f"Добавленны все каналы для суммаризации:\n {formatted_string}",
+        text=f"Добавлены все каналы для суммаризации:\n {formatted_string}",
         reply_markup=ReplyKeyboardRemove(),
         disable_web_page_preview=True
     )

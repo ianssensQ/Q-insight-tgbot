@@ -28,8 +28,18 @@ class Post:
     def get_text_from_post(self):
         with SessionLocal() as db:
             text = db.query(PostTable.post_text).filter(PostTable.id == self.id).first()
-            logger.info(f"Post loaded: {text}")
+            logger.info(f"Text loaded: {text}")
             return text
+
+    @staticmethod
+    def filter_posts(task_id, channel_id):
+        with SessionLocal() as db:
+            ids = db.query(PostTable.id).filter(PostTable.task_id == task_id,
+                                                PostTable.channel_id == channel_id,
+                                                PostTable.class_ != 0,
+                                                ).all()
+            logger.info(f"Text loaded: {ids}")
+            return ids
 
     def save_post_result_class(self, class_):
         with SessionLocal() as db:
@@ -77,11 +87,10 @@ class Post:
 
 
 if __name__ == "__main__":
-    pass
-    post = Post()
+    post = Post(post_id=1250)
+    if not post.check_res_class():
+        print(post.get_text_from_post()[0])
 
-    if not post.get_ids(1, 2):
-        print('waiting')
     """
     while states == 'waiting for data':
         if post.get_ids(1, 2):    
