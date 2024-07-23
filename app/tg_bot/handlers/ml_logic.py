@@ -28,26 +28,41 @@ async def predict_redirect(callback: CallbackQuery, state: FSMContext):
     channel = connection.channel()
 
     open_queue = 'parsing_queue'
+    classification_queue = "classification_queue"
+    summ_posts_queue = "summ_posts_queue"
+    summ_channels_queue = "summ_channels_queue"
     close_queue = "predictions_callback"
 
     channel.queue_declare(queue=open_queue)
+    channel.queue_declare(queue=classification_queue)
+    channel.queue_declare(queue=summ_posts_queue)
+    channel.queue_declare(queue=summ_channels_queue)
     channel.queue_declare(queue=close_queue)
-    check = uuid.uuid4()
+    check = str(uuid.uuid4())
+
+    queues = [classification_queue,
+              summ_posts_queue,
+              summ_channels_queue,
+              close_queue]
+
     channels_urls_ids = list(zip(channel_ids, task_list))
+
     await asyncio.gather(*[send_channel_to_queue(channel,
                                                  open_queue,
                                                  pickle.dumps({"channel_id": task[0], "url": task[1]}),
                                                  task_id,
                                                  interval,
-                                                 check)
+                                                 check,
+                                                 queues)
                            for task in channels_urls_ids])
 
     def close_callback(ch, method, properties, body):
-        message = pickle.loads(body)
+        message = properties.headers['check']
         if message == check:
             ch.basic_ack(
                 delivery_tag=method.delivery_tag
             )
+            print("Closing Done")
             connection.close()
 
     channel.basic_consume(
@@ -68,7 +83,8 @@ async def send_channel_to_queue(channel,
                                 url,
                                 task_id,
                                 interval,
-                                check):
+                                check,
+                                queues):
     channel.basic_publish(
         exchange='',
         routing_key=queue,
@@ -76,7 +92,8 @@ async def send_channel_to_queue(channel,
         properties=pika.BasicProperties(
             headers={'task_id': task_id,
                      'interval': interval,
-                     'check': check
+                     'check': check,
+                     'queues': queues
                      }
         )
     )

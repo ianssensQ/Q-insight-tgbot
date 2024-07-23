@@ -13,19 +13,3 @@ services:
     ports:
       - 15672:15672
       - 5672:5672
-
-  workers:
-    build: ./app/
-    env_file:
-      - app/.env
-    volumes:
-      - ./app:/app
-    command: python services/rabbit/workers/all_summ_workers.py
-    depends_on:
-      rabbitmq:
-        condition: service_started
-    restart: on-failure
-    deploy:
-      mode: replicated
-      replicas: 2
-

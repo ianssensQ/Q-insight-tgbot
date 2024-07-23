@@ -28,3 +28,9 @@ spacy == 3.7.5
 scipy == 1.14.0
 xgboost == 2.1.0
 thinc==8.2.5
+
+emoji == 2.12.1
+num2words == 0.5.13
+pymorphy2 == 0.9.1
+transformers == 4.42.4
+accelerate == 0.32.1

@@ -12,8 +12,8 @@ connection_params = pika.ConnectionParameters(
         username=user,
         password=password,
     ),
-    heartbeat=30,
-    blocked_connection_timeout=2,
+    heartbeat=600,
+    blocked_connection_timeout=300,
 )
 
 """

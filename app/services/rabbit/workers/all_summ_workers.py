@@ -10,42 +10,115 @@ import uuid
 import pika
 import asyncio
 import pandas as pd
+import threading
 
 connection = pika.BlockingConnection(connection_params)
 channel = connection.channel()
+
 open_queue = 'parsing_queue'
+classification_queue = "classification_queue"
+summ_posts_queue = "summ_posts_queue"
+summ_channels_queue = "summ_channels_queue"
+close_queue = "predictions_callback"
+
 channel.queue_declare(queue=open_queue)
+channel.queue_declare(queue=classification_queue)
+channel.queue_declare(queue=summ_posts_queue)
+channel.queue_declare(queue=summ_channels_queue)
+channel.queue_declare(queue=close_queue)
 
 
-def parse_post(ch, method, properties, body):
+def parser_post(ch, method, properties, body):
     data = pickle.loads(body)
-    channel_to_parse = data['channel']
-    channel_id = data['url']
+    print(data,  properties.headers['task_id'])
+    channel_id = data['channel_id']
+    channel_to_parse = data['url']
     task_id = properties.headers['task_id']
     interval = properties.headers['interval']
-    check = properties.headers['check']
     try:
         messages = client.loop.run_until_complete(fetch_messages(channel_to_parse, days=interval))
         df = pd.DataFrame(messages)
-        df['task_id'] = task_id
-        df['channel_id'] = channel_id
-        df.to_sql('posts', con=engine, if_exists='append', index=False)
+        df.dropna(subset='post_text')
+
+        def is_blank(x):
+            return isinstance(x, str) and x.strip() == ''
+
+        data_cleaned = df[~df['post_text'].apply(is_blank)]
+        data_cleaned.loc[:, 'task_id'] = task_id
+        data_cleaned.loc[:, 'channel_id'] = channel_id
+        data_cleaned.to_sql('posts', con=engine, if_exists='append', index=False)
     except Exception as e:
         print(f"Error: {e}")
 
 
-def callback(ch, method, properties, body):
-    parse_post(ch, method, properties, body)
+def make_callback_parser(ch, method, properties, body):
+    queue_name = properties.headers['queues'][0]
+    channel.basic_publish(exchange="",
+                          routing_key=queue_name,
+                          properties=pika.BasicProperties(headers=properties.headers),
+                          body=body)
+    ch.basic_ack(
+        delivery_tag=method.delivery_tag
+    )
+    print("Parsing Done")
 
 
-def start_consuming_ml():
+def callback_parser(ch, method, properties, body):
+    parser_post(ch, method, properties, body)
+    make_callback_parser(ch, method, properties, body)
+
+
+def start_consuming_parser():
+    connection = pika.BlockingConnection(connection_params)
+    channel = connection.channel()
     channel.basic_consume(
         queue=open_queue,
-        on_message_callback=callback,
-        auto_ack=False,  # Автоматическое подтверждение обработки сообщений
+        on_message_callback=callback_parser,
+        auto_ack=False,
     )
-    print("Waiting for messages. To exit, press Ctrl+C")
+    print("First queue consuming")
     channel.start_consuming()
 
-if __name__ == "__main__":
-    start_consuming_ml()
+
+def classification_post(ch, method, properties, body):
+    pass
+
+
+def make_callback_classification(ch, method, properties, body):
+    queue_name = properties.headers['queues'][3]
+    channel.basic_publish(exchange="",
+                          routing_key=queue_name,
+                          properties=pika.BasicProperties(headers=properties.headers),
+                          body=body)
+    ch.basic_ack(
+        delivery_tag=method.delivery_tag
+    )
+    print("Classification Done")
+
+
+def callback_classification(ch, method, properties, body):
+    classification_post(ch, method, properties, body)
+    make_callback_classification(ch, method, properties, body)
+
+
+def start_consuming_classification():
+    connection = pika.BlockingConnection(connection_params)
+    channel = connection.channel()
+    channel.basic_consume(
+        queue=classification_queue,
+        on_message_callback=callback_classification,
+        auto_ack=False,
+    )
+    print("Second queue consuming \n")
+    channel.start_consuming()
+
+
+if __name__ == '__main__':
+    parser_thread = threading.Thread(target=start_consuming_parser)
+    classification_thread = threading.Thread(target=start_consuming_classification)
+
+    parser_thread.start()
+    classification_thread.start()
+
+    parser_thread.join()
+    classification_thread.join()

@@ -11,3 +11,6 @@
 - __*./app/services/rabbit/workers/*__ 
 
 После первого входа информация о сессии сохраняется.
+
+Для классификации
+python -m spacy download ru_core_news_sm

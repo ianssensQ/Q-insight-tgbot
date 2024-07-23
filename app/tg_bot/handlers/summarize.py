@@ -155,7 +155,8 @@ async def choose_all_channels(callback: CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
     channel_list = user_data['channel_list']
     chat_id = user_data['chat_id']
-    task_list = channel_list
+    task_list = user_data['task_list']
+    task_list += channel_list
     await state.update_data(task_list=task_list)
     formatted_string = '\n 🔘'.join(f'{item}' for item in task_list)
     formatted_string = '🔘' + formatted_string
