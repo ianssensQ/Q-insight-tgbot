@@ -84,31 +84,38 @@ async def predict_redirect(callback: CallbackQuery, state: FSMContext):
 
 @router.message(StateFilter(Summ.Predict))
 async def predict_return(message: Message, state: FSMContext):
-    await message.answer(
-        text="Перехватил \n",
-    )
     user_data = await state.get_data()
-    task_id = user_data['task_id']
     channel_ids = user_data['channel_info']
 
     for channel_id in channel_ids:
         channel = Channel(channel_id=channel_id)
         result = channel.load_channel_result()[0]
         result = await escape_markdown_v1(result)
-        result = await split_text(result, 4090)
-        if result == 'No data':
-            await message.answer(
-                text=f'Нет данных по данному каналу {channel_id} за этот промежуток времени. \n',
-            )
-        else:
+        if len(result) > 4090:
+            results = await split_text(result, 4090)
             await message.answer(
                 text=f'**Результаты суммирования по каналу {channel_id}**:\n',
                 parse_mode=ParseMode.MARKDOWN_V2
             )
-            await message.answer(
-                text=result,
-                parse_mode=ParseMode.MARKDOWN_V2
-            )
+            for result in results:
+                await message.answer(
+                    text=result,
+                    parse_mode=ParseMode.MARKDOWN_V2
+                )
+        else:
+            if result == 'No data':
+                await message.answer(
+                    text=f'Нет данных по данному каналу {channel_id} за этот промежуток времени. \n',
+                )
+            else:
+                await message.answer(
+                    text=f'**Результаты суммирования по каналу {channel_id}**:\n',
+                    parse_mode=ParseMode.MARKDOWN_V2
+                )
+                await message.answer(
+                    text=result,
+                    parse_mode=ParseMode.MARKDOWN_V2
+                )
 
 
 async def escape_markdown_v1(text):
